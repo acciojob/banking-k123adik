@@ -1,17 +1,7 @@
 package com.driver;
 
-import java.util.HashMap;
-import java.util.Map;
+import static java.lang.String.valueOf;
 
-class Pair {
-    Character key;
-    Integer value;
-
-    public Pair(Character key, Integer value) {
-        this.key = key;
-        this.value = value;
-    }
-}
 public class CurrentAccount extends BankAccount{
     String tradeLicenseId; //consists of Uppercase English characters only
 
@@ -19,28 +9,13 @@ public class CurrentAccount extends BankAccount{
         return tradeLicenseId;
     }
 
-    public void setTradeLicenseId(String tradeLicenseId) {
-        this.tradeLicenseId = tradeLicenseId;
-    }
-
-    public CurrentAccount(String name, double balance, double minBalance) {
-
-        super(name, balance, minBalance);
-    }
-
-    public CurrentAccount(String name, double balance) {
-
-        super(name, balance, 5000);
-    }
-
-
     public CurrentAccount(String name, double balance, String tradeLicenseId) throws Exception {
         // minimum balance is 5000 by default. If balance is less than 5000, throw "Insufficient Balance" exception
-
-        super(name, balance);
-
+        super(name, balance, 5000);
         this.tradeLicenseId = tradeLicenseId;
-        validateLicenseId();
+        if(balance < 5000){
+            throw new Exception("Insufficient Balance");
+        }
 
     }
 
@@ -50,132 +25,107 @@ public class CurrentAccount extends BankAccount{
         // If the characters of the license Id can be rearranged to create any valid license Id
         // If it is not possible, throw "Valid License can not be generated" Exception
 
-        boolean ans = noAdjacentCharacters();
-
-        if (ans == false) {
-
-            boolean isValid = createValidId();
-
-            if (isValid == false) {
-
+        if(!isNumberValid(tradeLicenseId)){
+            String rearrangedId = arrangeString(tradeLicenseId);
+            if(rearrangedId == ""){
                 throw new Exception("Valid License can not be generated");
+            }else{
+                this.tradeLicenseId = rearrangedId;
             }
         }
-
     }
 
-    public boolean createValidId() {
 
-        int n = tradeLicenseId.length();
-
-        // A A A A B B B B B B B B B B B B B C C C D H G G G H H
-
-        HashMap<Character, Integer> hashMap = new HashMap<>();
-
-        String ans = "";
-
-        for (int i = 0; i < n; i++) {
-
-            Character key = tradeLicenseId.charAt(i);
-
-            hashMap.put(key, hashMap.getOrDefault(key, 0) + 1);
-        }
-
-
-//        char maxRepeatedChar = ' ';
-        int maxRepeatFreq = 0;
-
-        Pair p = new Pair(' ', 0);
-
-        for (Map.Entry<Character, Integer> entry : hashMap.entrySet()) {
-
-            Character key = entry.getKey();
-            int value = entry.getValue();
-
-            if (value > maxRepeatFreq) {
-//                maxRepeatedChar = key;
-                maxRepeatFreq = value;
-
-                p.key = key;
-                p.value = value;
-            }
-
-        }
-
-        if (n % 2 == 0 && maxRepeatFreq >= (n / 2) + 1) {
-            return false;
-        }else if (n % 2 == 1 && maxRepeatFreq > (n + 1) / 2) {
-            return false;
-        }
-
-        rearrangeCharacters(hashMap, p, n);
-
-        return true;
-    }
-
-    private void rearrangeCharacters(HashMap<Character, Integer> hashMap, Pair pair, int n) {
-
-        char[] ans = new char[n];
-        int index = 0;
-
-
-        while (hashMap.get(pair.key) > 0) {
-
-            // dec value and put char in ans string
-            ans[index] = pair.key;
-            index = index + 2;
-
-            if (index >= n) {
-                index = 1;
-            }
-
-            hashMap.put(pair.key, hashMap.get(pair.key) - 1);
-
-            if (hashMap.get(pair.key) ==  0) {
-                hashMap.remove(pair.key);
-            }
-        }
-
-        while (hashMap.size() > 0) {
-
-            for (Character key : hashMap.keySet()) {
-
-                if (hashMap.get(key) > 0) {
-
-                    ans[index] = key;
-                    index = index + 2;
-
-                    if (index >= n) {
-                        index = 1;
-                    }
-
-                    hashMap.put(key, hashMap.get(key) - 1);
-
-                    if (hashMap.get(key) ==  0) {
-                        hashMap.remove(key);
-                    }
-
-                }
-
-            }
-
-        }
-
-        setTradeLicenseId(ans.toString());
-    }
-
-    public boolean noAdjacentCharacters() {
-
-        char[] id = tradeLicenseId.toCharArray();
-
-        for (int i = 0; i < id.length - 1; i++) {
-
-            if (id[i] == id[i + 1]) {
+    public boolean isNumberValid(String licenseId){
+        for(int i=0; i<licenseId.length()-1; i++){
+            if(licenseId.charAt(i) == licenseId.charAt(i+1)){
                 return false;
             }
         }
         return true;
     }
 
+
+    public String arrangeString(String s){
+        int n = s.length();
+
+        int[]count = new int[26];
+        for(int i=0;i<26;i++){
+            count[i] = 0;
+        }
+        for(char ch: s.toCharArray()){
+            count[(int)ch - (int)'A']++;
+        }
+
+        char ch_max = getCountChar(count);
+        int maxCount = count[(int)ch_max - (int)'A'];
+
+        if(maxCount > (n+1)/2){
+            return "";
+        }
+
+//        int index = 0;
+//        char[]res = new char[n];
+//        for(index=0;index<n;index=index+2){
+//            if(count[maxCount]>0){
+//                res[index] = ch_max;
+//                count[maxCount]--;
+//            }else{
+//                break;
+//            }
+//        }
+//
+//        for(int i=0;i<26;i++){
+//            char ch = (char)('A' + i);
+//            while(count[i] > 0){
+//                if(index>n){
+//                    index = 1;
+//                }
+//                res[index] = ch;
+//                index = index + 2;
+//                count[i]--;
+//            }
+//        }
+//        String ans = valueOf(res);
+//        return ans;
+
+        String res = "";
+        for (int i = 0; i < n; i++) {
+            res += ' ';
+        }
+
+        int ind = 0;
+        while (maxCount > 0) {
+            res = res.substring(0, ind) + ch_max
+                    + res.substring(ind + 1);
+            ind = ind + 2;
+            maxCount--;
+        }
+        count[(int) ch_max - (int) 'A'] = 0;
+        for (int i = 0; i < 26; i++) {
+            while (count[i] > 0) {
+                ind = (ind >= n) ? 1 : ind;
+                res = res.substring(0, ind)
+                        + (char) ((int) 'A' + i)
+                        + res.substring(ind + 1);
+                ind += 2;
+                count[i]--;
+            }
+        }
+        return res;
+    }
+
+
+    public char getCountChar(int[] count){
+        int max = 0;
+        char ch = 0;
+        for(int i=0;i<26;i++){
+            if(count[i]>max){
+                max = count[i];
+                ch = (char)((int)'A' + i);
+            }
+        }
+        return ch;
+    }
 
 }

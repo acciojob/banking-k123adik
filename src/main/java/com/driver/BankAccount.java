@@ -6,14 +6,19 @@ public class BankAccount {
     private double balance;
     private double minBalance;
 
+    public String getName() {
+        return name;
+    }
 
-    public BankAccount(String name, double balance) {
-        this.name = name;
-        this.balance = balance;
+    public double getBalance() {
+        return balance;
+    }
+
+    public double getMinBalance() {
+        return minBalance;
     }
 
     public BankAccount(String name, double balance, double minBalance) {
-
         this.name = name;
         this.balance = balance;
         this.minBalance = minBalance;
@@ -24,70 +29,50 @@ public class BankAccount {
         //Generate account number having given number of 'digits' such that the sum of digits is equal to 'sum'
         //If it is not possible, throw "Account Number can not be generated" exception
 
-        String accountNumber = "";
-
-        if (sum > digits * 9) {
+//        remaining number
+        int rem = sum;
+        String accNo = "";
+        if(digits*9 < sum){
             throw new Exception("Account Number can not be generated");
         }
-        else {
-
-            while (sum >= 9) {
-                accountNumber = accountNumber + 9;
-                sum = sum - 9;
+        else{
+            while(digits > 0 && rem > 0){
+                if(rem >= 9){
+                    rem = rem - 9;
+                    accNo = accNo + "9";
+                }
+                else{
+                    accNo = accNo + Integer.toString(rem);
+                    rem = 0;
+                }
+                digits--;
             }
-
-            if (sum > 0) {
-                accountNumber = accountNumber + sum;
+            while(digits > 0){
+                accNo = accNo + "0";
+                digits--;
             }
-
-            while (accountNumber.length() < digits) {
-
-                accountNumber = accountNumber + 0;
-            }
-
-            return accountNumber;
+            return accNo;
         }
-
-        // return null;
+//        return null;
     }
 
     public void deposit(double amount) {
         //add amount to balance
+
         balance = balance + amount;
+
     }
 
     public void withdraw(double amount) throws Exception {
         // Remember to throw "Insufficient Balance" exception, if the remaining amount would be less than minimum balance
 
-        if (amount > balance) {
-            throw new Exception("Insufficient Balance");
+        if(this.balance-amount>=getMinBalance())
+        {
+            balance=balance-amount;
         }
         else {
-            balance = balance - amount;
+            throw new Exception("Insufficient Balance");
         }
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public double getBalance() {
-        return balance;
-    }
-
-    public void setBalance(double balance) {
-        this.balance = balance;
-    }
-
-    public double getMinBalance() {
-        return minBalance;
-    }
-
-    public void setMinBalance(double minBalance) {
-        this.minBalance = minBalance;
-    }
 }
